@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>0chan</title>
+  <link href='https://fonts.googleapis.com/css?family=Share+Tech+Mono|Noto+Sans:400,400italic,700,700italic&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/all.css" type="text/css" />
+  <script type="text/javascript" src="js/all.js" async></script>
+</head>
+<body>
+  <script id="skip-gap-template" type="x-tmpl-mustache" class="template">
+    <div class="skip-gap">
+      {{count}} post(s) omitted. ↕ <span class="expand-button">expand</span>
+    </div>
+  </script>
+
+  <script id="form-call-button-template" type="x-tmpl-mustache" class="template">
+    <div id="form-call-button">
+      [ <span>{{text}}</span> ]
+    </div>
+    <hr>
+  </script>
+  <script id="post-template" type="x-tmpl-mustache" class="template">
+    <div class="post {{#post.parent}}reply{{/post.parent}}{{^post.parent}}opening{{/post.parent}}"
+      data-hashsum={{post.hashsum}}>
+      <div class="info">
+        <div class="time-and-id">
+          <span>
+            {{#post.anonymous}}
+              Anonymous
+            {{/post.anonymous}}
+            {{^post.anonymous}}
+              <b>{{post.user}}</b>
+            {{/post.anonymous}}
+            wrote {{post.time}},
+          </span>
+          <em class="post-id">#{{post.hashsum_short}}</em>
+        </div>
+      </div>
+      {{#post.file_thumb}}
+        <a href="{{post.file_full}}" target="_blank">
+          <img class="attachment" src="{{post.file_thumb}}" />
+        </a>
+      {{/post.file_thumb}}
+      <blockquote class="text">{{{post.body}}}</blockquote>
+    </div>
+  </script>
+
+  <script id="auth-form-template" type="x-tmpl-mustache" class="template">
+    {{#user}}
+      <select name="name" class="name">
+        <option value="anonymous">Anonymous</option>
+        <option value="signed">{{user}}</option>
+      </select>      
+      <input type="submit" value="Submit!" class="submit">
+    {{/user}} 
+
+    {{^user}}
+      <div class="auth-please">
+        <u>Authorize</u> to post messages.<br>You will still be able to post anonymously.
+      </div>
+    {{/user}}
+  </script>
+
+  <script id="header-template" type="x-tmpl-mustache" class="template">
+    <div id="header">
+      <a href="?" class="board-name">{{boardName}}</a> 
+      on
+      <a href="/1FiSxj2yDPeGuuf6iBwRAXvEMQJATAZNt6" class="to-main">0chan.bit</a>
+
+      <div id="stats">{{peers}} peers, {{siteSize}}</div>
+    </div>
+  </script>
+
+  <script id="form-template" type="x-tmpl-mustache" class="template">
+    <form id="top-form" class="form">
+      <div class="form-preloader">
+        <span>
+          sending your message...
+        </span>
+      </div>
+      <table>
+        <tr>
+          <td>Comment</td>
+          <td>
+            <textarea placeholder="Up to 3000 symbols, required if no file attached" name="body" class="text"></textarea>
+            <input type="hidden" name="parent" class="parent">
+          </td>
+        </tr>
+        <tr>
+          <td>File</td>
+          <td>
+            <input type="file" name="file" class="file">
+          </td>
+        </tr>
+        <tr>
+          <td>Sign</td>
+          <td>
+            <div class='auth-form'></div>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </script>
+
+  <div id="header">
+    loading...
+  </div>
+
+  <div id="preloader">
+    <img src="img/loading.gif">
+  </div>
+
+  <div id="container">
+  </div>
+
+  <canvas id="canvas"></canvas>
+</body>
+</html>

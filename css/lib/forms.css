@@ -1,0 +1,113 @@
+#top-form, #reply-form {
+  display: table;
+  width: 416px;
+  color: #aaa;
+}
+
+#top-form {
+  margin: 0 auto;
+}
+
+.form {
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+
+.form.loading  table {
+  -webkit-filter: blur(1px)
+   -moz-filter: blur(1px);
+   -o-filter: blur(1px);
+   -ms-filter: blur(1px);
+   filter: blur(1px);
+   opacity: 0.5;
+}
+
+.form table {
+  position: relative;
+  z-index: 5;
+  border-spacing: 0px 3px;
+}
+
+.form tr td:first-child {
+  font-size: 12px;
+  padding: 3px 5px;
+  width: 100px;
+  background-color: #2C2C2C;
+  border: 1px solid #575757;
+}
+
+.form tr td:last-child {
+  width: 300px;
+  padding: 0px;
+}
+
+.form textarea {
+  width: 295px;
+  min-width: 295px;
+  max-width: 295px;
+  height: 80px;
+  min-height: 80px;
+  max-height: 80px;
+}
+
+.form input[type=text] {
+  width: 295px;
+}
+
+.form input, .form textarea, .form select {
+  margin-left: 7px;
+}
+
+.form input[type=text], textarea {
+  background: #ddd;
+  color: #000;
+}
+
+.form .submit {
+  float: right;
+  width: 70px;
+  font-family: 'Noto Sans', sans-serif !important;
+  font-size: 12px;
+}
+
+.form .auth-form {
+  padding: 0px;
+  margin: 0px;
+}
+
+.form-preloader {
+  display: none;
+}
+
+.form.loading .form-preloader {
+  display: block !important;
+}
+
+.form-preloader {
+  position: absolute;
+  z-index: 10;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  text-align: center;
+}
+
+.form-preloader span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: #ddd;
+  padding: 10px 0px;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  top: 30px;
+}
+
+.auth-please {
+  margin-left: 7px;
+}

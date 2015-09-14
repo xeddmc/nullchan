@@ -1,0 +1,50 @@
+{
+  "address": "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag", 
+  "background-color": "#222222", 
+  "description": "Development board on 0chan", 
+  "files": {
+    "css/all.css": {
+      "sha512": "06a64905025c6dd69573703edd35f8f0cab0eac0c5602941ad91d196be4a453b", 
+      "size": 7916
+    }, 
+    "data/settings.json": {
+      "sha512": "b0ba200b6fe2e745cd4364f1afe98d4707975647e1e90c1fb8c832dadd88d994", 
+      "size": 32
+    }, 
+    "dbschema.json": {
+      "sha512": "4ff6a8b17853898481092207e9d24058e9f73e1df80e339d0f49299bca0dfc8f", 
+      "size": 869
+    }, 
+    "img/loading.gif": {
+      "sha512": "0a95ae23dde34c14a1defc9b1dee367049e07bb9bf05ec336f258114d8382a7c", 
+      "size": 4852
+    }, 
+    "index.html": {
+      "sha512": "e18c9615dcdf163bbdc4246ad06d250bf4010bc6fa98c0ffff34b684f5e2357b", 
+      "size": 3445
+    }, 
+    "js/all.js": {
+      "sha512": "20e78ced3955da95eb0220b71dbb5e724cffe161261bad04b4096be118bead92", 
+      "size": 39336
+    }
+  }, 
+  "ignore": "(.git|data/users|data/0chan.db|js/lib|css/lib|js/zengine).*", 
+  "includes": {
+    "data/users/content.json": {
+      "signers": [], 
+      "signers_required": 1
+    }
+  }, 
+  "modified": 1442264192.163612, 
+  "sign": [
+    13720070749840058669075743631732360088618046992978649661657740955229631234303, 
+    8638731002509232869718661142284349105217930502057057793574829456237662883475
+  ], 
+  "signers_sign": "HEEFf+vCP4aoQW61BjKcTwKboCruKMov5K1vE8lxeijrf4uDTfkcqJWKyeG4pyNo5a7yd8YJo99Wr9cxys/l9mM=", 
+  "signs": {
+    "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag": "G4Wztt8CxuheD9FfeqOw74FWM51m09KHQZ10S90/IQVuKgQ5lL+zQLUS4CC3VkuWfRjvIkkY9rgIO26TxHuHtSk="
+  }, 
+  "signs_required": 1, 
+  "title": "dev.0chan", 
+  "zeronet_version": "0.3.2"
+}

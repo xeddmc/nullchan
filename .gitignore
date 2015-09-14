@@ -1,0 +1,3 @@
+*.db
+data/users/*
+!data/users/content.json

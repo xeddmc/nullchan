@@ -1,0 +1,34 @@
+{
+  "db_name": "0chan",
+  "db_file": "data/0chan.db",
+  "version": 2,
+  "maps": {
+    "users/.+/data.json": {
+      "to_table": [ "message" ]
+    },
+    "users/.+/content.json": {
+      "to_keyvalue": [ "cert_user_id" ]
+    }
+  },
+  "tables": {
+    "message": {
+      "cols": [
+        ["hashsum", "STRING"],
+        ["title", "STRING"],
+        ["body", "TEXT"],
+        ["anonymous", "BOOLEAN"],
+        ["created_at", "INTEGER"],
+        ["parent", "STRING"],
+        ["file_thumb", "STRING"],
+        ["file_full", "STRING"],
+        ["json_id", "INTEGER REFERENCES json (json_id)"]
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX message_key ON message(json_id, created_at)",
+        "CREATE UNIQUE INDEX message_hashsum ON message(hashsum)",
+        "CREATE INDEX message_parent ON message(parent)"
+      ],
+      "schema_changed": 1442062009
+    }
+  }
+}
