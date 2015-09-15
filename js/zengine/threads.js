@@ -47,6 +47,7 @@
         }
 
         this.preparePostInfo(posts[i]);
+        console.log(JSON.stringify(posts[i].body))
         thread.innerHTML += Templates.render("post", { post: posts[i] });
       };
 
