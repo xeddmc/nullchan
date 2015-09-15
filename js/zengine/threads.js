@@ -47,7 +47,6 @@
         }
 
         this.preparePostInfo(posts[i]);
-        console.log(JSON.stringify(posts[i].body))
         thread.innerHTML += Templates.render("post", { post: posts[i] });
       };
 
@@ -108,7 +107,6 @@
     };
 
     this.appendPost = function(post) {
-      console.log(post);
       var thread = document.getElementById("thread-" + post.parent);
 
       if (!thread) {

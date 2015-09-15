@@ -552,7 +552,6 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
         [(re = /%%([\s\S]+?)%%/mg), '<em class="spoiler">$1</em>'],
 
         // line breaks
-        [(re = /\r/), ""],
         [(re = /\r?\n/g), "\n"],
         [(re = /\n/g), '<br>'],
         [(re = /(<br>){2,}/g), '<br><br>'],
@@ -664,7 +663,6 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
         }
 
         this.preparePostInfo(posts[i]);
-        console.log(JSON.stringify(posts[i].body))
         thread.innerHTML += Templates.render("post", { post: posts[i] });
       };
 
@@ -725,7 +723,6 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     };
 
     this.appendPost = function(post) {
-      console.log(post);
       var thread = document.getElementById("thread-" + post.parent);
 
       if (!thread) {
