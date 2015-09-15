@@ -49,7 +49,7 @@
         [(re = /%%([\s\S]+?)%%/mg), '<em class="spoiler">$1</em>'],
 
         // line breaks
-        [(re = /\r\n/g), '<br />'],
+        [(re = /(\r|\n)\n/g), '<br />'],
         [(re = /(<br \/>){2,}/g), '<br /><br />'],
       ];
     };

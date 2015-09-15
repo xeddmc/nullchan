@@ -128,6 +128,11 @@
 
     this.expandThread = function(event) {
       var gap     = event.target;
+
+      if (gap.className == "expand-button") {
+        gap = gap.parentNode;
+      }
+
       var thread  = gap.parentNode;
       var posts   = cachedPosts[thread.dataset.hashsum];
       gap.innerHTML = "loading...";
@@ -143,7 +148,7 @@
 
     this.bindEvents = function() {
       container.addEventListener("click", function(event) {
-        if (event.target.className == "skip-gap") {
+        if (event.target.className == "skip-gap" || event.target.className == "expand-button") {
           this.expandThread(event);
         }
         try {

@@ -485,7 +485,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
 
     this.update = function(siteInfo, settings) {
       element.outerHTML = Templates.render("header", { 
-        boardName:  settings.boardName,
+        boardName:  "Development",//settings.boardName,
         peers:      siteInfo.settings.peers,
         siteSize:   formatSizeUnits(siteInfo.settings.size),
       });
@@ -552,7 +552,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
         [(re = /%%([\s\S]+?)%%/mg), '<em class="spoiler">$1</em>'],
 
         // line breaks
-        [(re = /\r\n/g), '<br />'],
+        [(re = /(\r|\n)\n/g), '<br />'],
         [(re = /(<br \/>){2,}/g), '<br /><br />'],
       ];
     };
@@ -743,6 +743,11 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
 
     this.expandThread = function(event) {
       var gap     = event.target;
+
+      if (gap.className == "expand-button") {
+        gap = gap.parentNode;
+      }
+
       var thread  = gap.parentNode;
       var posts   = cachedPosts[thread.dataset.hashsum];
       gap.innerHTML = "loading...";
@@ -758,7 +763,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
 
     this.bindEvents = function() {
       container.addEventListener("click", function(event) {
-        if (event.target.className == "skip-gap") {
+        if (event.target.className == "skip-gap" || event.target.className == "expand-button") {
           this.expandThread(event);
         }
         try {
