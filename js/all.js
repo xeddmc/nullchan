@@ -22,112 +22,118 @@ window.formatSizeUnits = function(bytes) {
 
 
 
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/lib/frame.js ---- */
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/lib/frame.coffee ---- */
 
 
-window.ZeroFrame = Class.extend(function() {
-  var url;
-  var waiting_cb;
-  var next_message_id;
-  var target;
-  var slice = [].slice;
+(function() {
+  var ZeroFrame,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    slice = [].slice;
 
-  this.constructor = function(url) {
-    this.url = url;
-    this.waiting_cb = {};
-    this.connect();
-    this.next_message_id = 1;
-    this.init();
-  };
+  ZeroFrame = (function() {
+    function ZeroFrame(url) {
+      this.onCloseWebsocket = bind(this.onCloseWebsocket, this);
+      this.onOpenWebsocket = bind(this.onOpenWebsocket, this);
+      this.route = bind(this.route, this);
+      this.onMessage = bind(this.onMessage, this);
+      this.url = url;
+      this.waiting_cb = {};
+      this.connect();
+      this.next_message_id = 1;
+      this.init();
+    }
 
-  this.init = function() {
-    console.log("INIT!");
-    return this;
-  };
+    ZeroFrame.prototype.init = function() {
+      return this;
+    };
 
-  this.connect = function() {
-    console.log("Connect");
-    this.target = window.parent;
-    window.addEventListener("message", this.onMessage, false);
-    return this;
-  };
-
-
-  this.onMessage = function(e) {
-    var cmd, message;
-    message = e.data;
-    cmd = message.cmd;
-    if (cmd === "response") {
-      if (this.waiting_cb[message.to] != null) {
-        return this.waiting_cb[message.to](message.result);
-      } else {
-        return this.log("Websocket callback not found:", message);
-      }
-    } else if (cmd === "wrapperReady") {
+    ZeroFrame.prototype.connect = function() {
+      this.target = window.parent;
+      window.addEventListener("message", this.onMessage, false);
       return this.cmd("innerReady");
-    } else if (cmd === "ping") {
-      return this.response(message.id, "pong");
-    } else if (cmd === "wrapperOpenedWebsocket") {
-      return this.onOpenWebsocket();
-    } else if (cmd === "wrapperClosedWebsocket") {
-      return this.onCloseWebsocket();
-    } else {
-      return this.route(cmd, message);
-    }
-  };
+    };
 
-  this.route = function(cmd, message) {
-    return this.log("Unknown command", message);
-  };
+    ZeroFrame.prototype.onMessage = function(e) {
+      var cmd, message;
+      message = e.data;
+      cmd = message.cmd;
+      if (cmd === "response") {
+        if (this.waiting_cb[message.to] != null) {
+          return this.waiting_cb[message.to](message.result);
+        } else {
+          return this.log("Websocket callback not found:", message);
+        }
+      } else if (cmd === "wrapperReady") {
+        return this.cmd("innerReady");
+      } else if (cmd === "ping") {
+        return this.response(message.id, "pong");
+      } else if (cmd === "wrapperOpenedWebsocket") {
+        return this.onOpenWebsocket();
+      } else if (cmd === "wrapperClosedWebsocket") {
+        return this.onCloseWebsocket();
+      } else {
+        return this.route(cmd, message);
+      }
+    };
 
-  this.response = function(to, result) {
-    return this.send({
-      "cmd": "response",
-      "to": to,
-      "result": result
-    });
-  };
+    ZeroFrame.prototype.route = function(cmd, message) {
+      return this.log("Unknown command", message);
+    };
 
-  this.cmd = function(cmd, params, cb) {
-    if (params == null) {
-      params = {};
-    }
-    if (cb == null) {
-      cb = null;
-    }
-    return this.send({
-      "cmd": cmd,
-      "params": params
-    }, cb);
-  };
+    ZeroFrame.prototype.response = function(to, result) {
+      return this.send({
+        "cmd": "response",
+        "to": to,
+        "result": result
+      });
+    };
 
-  this.send = function(message, cb) {
-    if (cb == null) {
-      cb = null;
-    }
-    message.id = this.next_message_id;
-    this.next_message_id += 1;
-    this.target.postMessage(message, "*");
-    if (cb) {
-      return this.waiting_cb[message.id] = cb;
-    }
-  };
+    ZeroFrame.prototype.cmd = function(cmd, params, cb) {
+      if (params == null) {
+        params = {};
+      }
+      if (cb == null) {
+        cb = null;
+      }
+      return this.send({
+        "cmd": cmd,
+        "params": params
+      }, cb);
+    };
 
-  this.log = function() {
-    var args;
-    args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-    return console.log.apply(console, ["[ZeroFrame]"].concat(slice.call(args)));
-  };
+    ZeroFrame.prototype.send = function(message, cb) {
+      if (cb == null) {
+        cb = null;
+      }
+      message.id = this.next_message_id;
+      this.next_message_id += 1;
+      this.target.postMessage(message, "*");
+      if (cb) {
+        return this.waiting_cb[message.id] = cb;
+      }
+    };
 
-  this.onOpenWebsocket = function() {
-    return this.log("Websocket open");
-  };
+    ZeroFrame.prototype.log = function() {
+      var args;
+      args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+      return console.log.apply(console, ["[ZeroFrame]"].concat(slice.call(args)));
+    };
 
-  this.onCloseWebsocket = function() {
-    return this.log("Websocket close");
-  };
-});
+    ZeroFrame.prototype.onOpenWebsocket = function() {
+      return this.log("Websocket open");
+    };
 
+    ZeroFrame.prototype.onCloseWebsocket = function() {
+      return this.log("Websocket close");
+    };
+
+    return ZeroFrame;
+
+  })();
+
+  window.ZeroFrame = ZeroFrame;
+
+}).call(this);
 
 
 /* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/lib/md5.js ---- */
@@ -227,709 +233,808 @@ window.ZeroFrame = Class.extend(function() {
 window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((\:\d+)?(?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_\#\/\?\*\:]*))?)/g;
 
 
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/forms.js ---- */
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/forms.coffee ---- */
 
 
 (function() {
-  var Forms = Class.extend(function() {
-    var topForm;
-    var replyForm;
+  var Forms,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-    this.constructor = function() {
-      
-    };
+  Forms = (function() {
+    function Forms() {
+      this.clearForm = bind(this.clearForm, this);
+      this.callReplyForm = bind(this.callReplyForm, this);
+      this.updateAuthForms = bind(this.updateAuthForms, this);
+      this.collectFormData = bind(this.collectFormData, this);
+      this.processFiles = bind(this.processFiles, this);
+      this.uploadPost = bind(this.uploadPost, this);
+      this.validateFormData = bind(this.validateFormData, this);
+      this.handleError = bind(this.handleError, this);
+      this.handleSubmit = bind(this.handleSubmit, this);
+      this.blurForm = bind(this.blurForm, this);
+      this.authPlease = bind(this.authPlease, this);
+      this.bindEvents = bind(this.bindEvents, this);
+      this.showTopForm = bind(this.showTopForm, this);
+    }
 
-    this.showTopForm = function(event) {
-      var button  = document.getElementById("form-call-button");
-      var element = document.createElement("div");
+    Forms.prototype.topForm = null;
+
+    Forms.prototype.replyForm = null;
+
+    Forms.prototype.showTopForm = function(event) {
+      var button, element, topForm;
+      button = document.getElementById("form-call-button");
+      element = document.createElement("div");
       element.innerHTML = Templates.render("form");
-
       topForm = element.firstChild;
       button.parentNode.replaceChild(topForm, button);
       topForm.getElementsByClassName("text")[0].focus();
-
-      this.updateAuthForms().then(function() {
-        this.bindEvents(topForm);
-      }.bind(this));
+      return this.updateAuthForms().then((function(_this) {
+        return function() {
+          return _this.bindEvents(topForm);
+        };
+      })(this));
     };
 
-    this.bindEvents = function(form) {
-      form.addEventListener("submit", this.handleSubmit);
+    Forms.prototype.bindEvents = function(form) {
       var auth;
+      form.addEventListener("submit", this.handleSubmit);
       if ((auth = form.getElementsByClassName("auth-please")).length > 0) {
-        auth[0].addEventListener("click", this.authPlease);
+        return auth[0].addEventListener("click", this.authPlease);
       }
     };
 
-    this.authPlease = function(event) {
-      Nullchan.cmd("certSelect", [["zeroid.bit"]]);
+    Forms.prototype.authPlease = function(event) {
+      return Nullchan.cmd("certSelect", [["zeroid.bit"]]);
     };
 
-    this.blurForm = function(form, state) {
-      if (state == true) {
-        form.className = "form loading";
+    Forms.prototype.blurForm = function(form, state) {
+      if (state === true) {
+        return form.className = "form loading";
       } else {
-        form.className = "form";
+        return form.className = "form";
       }
     };
 
-    this.handleSubmit = function(event) {
+    Forms.prototype.handleSubmit = function(event) {
+      var data, form, validation;
       event.preventDefault();
-      var form = event.currentTarget;
-      var data = this.collectFormData(form);
-      var validation = this.validateFormData(data);
-
-      if (validation != true) {
+      form = event.currentTarget;
+      data = this.collectFormData(form);
+      validation = this.validateFormData(data);
+      if (validation !== true) {
         Nullchan.displayError(validation);
         return false;
       }
-
       this.blurForm(form, true);
-      this.processFiles(data).then(function(modifiedData) {
-        this.uploadPost(modifiedData).then(function(newPost) {
-          this.blurForm(form, false);
-          this.clearForm(form);
-
-          if (form.id == "reply-form") {
-            form.style.display = "none";
-            Threads.appendPost(newPost);
-          } else {
-            Nullchan.determineRoute();
-          }
-        }.bind(this)).catch(this.handleError);  
-      }.bind(this)).catch(this.handleError);
-
+      this.processFiles(data).then((function(_this) {
+        return function(modifiedData) {
+          return _this.uploadPost(modifiedData).then(function(newPost) {
+            _this.blurForm(form, false);
+            _this.clearForm(form);
+            if (form.id === "reply-form") {
+              form.style.display = "none";
+              return Threads.appendPost(newPost);
+            } else {
+              return Nullchan.determineRoute();
+            }
+          });
+        };
+      })(this));
       return false;
     };
 
-    this.handleError = function(err) {
+    Forms.prototype.handleError = function(err) {
+      var form, i, len, ref, results;
       Nullchan.displayError(err);
-      var forms = document.getElementsByClassName("form loading");
-      for (var i = 0; i < forms.length; i++) {
-        this.blurForm(forms[i], false);
-      };
+      ref = document.getElementsByClassName("form loading");
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        form = ref[i];
+        results.push(this.blurForm(form, false));
+      }
+      return results;
     };
 
-    this.validateFormData = function(data) {
+    Forms.prototype.validateFormData = function(data) {
+      var ref;
       if (data.body.length > 3000) {
-        return "Comment length shouldn't exceed 3000 symbols."
+        return "Comment length shouldn't exceed 3000 symbols.";
       }
-
-      if (data.body.length == 0 && !!!data.file) {
-        return "Your post is empty, need a comment or a file."
+      if (data.body.length === 0 && !!!data.file) {
+        return "Your post is empty, need a comment or a file.";
       }
-
       if (!!data.file) {
-        if (["image/jpeg", "image/png", "image/gif"].indexOf(data.file.type) == -1) {
-          return "Your file is not an image."
+        if ((ref = data.file.type) !== "image/jpeg" && ref !== "image/png" && ref !== "image/gif") {
+          return "Your file is not an image.";
         }
       }
-
       return true;
     };
 
-    this.uploadPost = function(formData) {
-      return new Promise(function(fulfill, reject) {
-        var filePath = ("data/users/" + Nullchan.getSiteInfo().auth_address + "/data.json");
-        Nullchan.cmd("fileGet", { inner_path: filePath, required: true }, function(data) {
-          if (!!data) {
-            try {
-              data = JSON.parse(data);
-            } catch(err) {
-              data = { message: [] };
+    Forms.prototype.uploadPost = function(formData) {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          var filePath;
+          filePath = "data/users/" + (Nullchan.getSiteInfo().auth_address) + "/data.json";
+          return Nullchan.cmd("fileGet", {
+            inner_path: filePath,
+            required: true
+          }, function(data) {
+            var err, error, json;
+            if (!!data) {
+              try {
+                data = JSON.parse(data);
+              } catch (error) {
+                err = error;
+                data = {
+                  message: []
+                };
+              }
+            } else {
+              data = {
+                message: []
+              };
             }
-          } else {
-            data = { message: [] };
-          }
-
-          formData.hashsum = md5(JSON.stringify(formData));
-          data.message.push(formData);
-          var json = unescape(encodeURIComponent(JSON.stringify(data, undefined, '  ')));
-
-          Nullchan.uploadFile(btoa(json), "data.json", true).then(function() {
-            fulfill(formData);
-          }.bind(this)).catch(function(err) { reject(err); }.bind(this));
-        }.bind(this))
-      }.bind(this));
-    }
-
-    this.processFiles = function(formData) {
-      return new Promise(function(fulfill, reject) {
-        if (!formData.file) {
-          delete formData.file;
-          return fulfill(formData);
-        }
-
-        var image  = document.createElement("img");
-        var reader = new FileReader();
-
-        reader.onload = function(event) {
-          image.src = event.target.result;
-        }.bind(this);
-
-        image.onload = function() {
-          var canvas    = document.createElement("canvas");
-          var ctx       = canvas.getContext("2d");
-          canvas.width  = image.width;
-          canvas.height = image.height;
-
-          ctx.drawImage(image, 0, 0, image.width, image.height);
-          var imageFull   = canvas.toDataURL("image/jpeg", 1).split(',')[1];
-          var maxWidth    = 200;
-          var maxHeight   = 200;
-          var width       = image.width;
-          var height      = image.height;
-
-          if (width > height) {
-            if (width > maxWidth) {
-              height *= (maxWidth / width);
-              width   = maxWidth;
-            }
-          } else {
-            if (height > maxHeight) {
-              width *= (maxHeight/ height);
-              height = maxHeight;
-            }
-          }
-
-          canvas.width  = width;
-          canvas.height = height;
-          ctx = canvas.getContext("2d");
-          ctx.drawImage(image, 0, 0, width, height);
-          var imageThumb = canvas.toDataURL("image/jpeg", 1).split(',')[1];
-          var hash = md5(imageFull);
-
-          Nullchan.uploadFile(imageFull, (hash + ".jpg"), false).then(function(fullPath) {
-            Nullchan.uploadFile(imageThumb, (hash + "-thumb.jpg"), false).then(function(thumbPath) {
-              formData.file_thumb = thumbPath;
-              formData.file_full  = fullPath;
-              delete formData.file;
-
-              fulfill(formData);
-            }.bind(this))
-          }.bind(this))
-        }.bind(this)
-
-        reader.readAsDataURL(formData.file);
-      }.bind(this))
+            formData.hashsum = md5(JSON.stringify(formData));
+            data.message.push(formData);
+            json = unescape(encodeURIComponent(JSON.stringify(data, void 0, '  ')));
+            return Nullchan.uploadFile(btoa(json), "data.json", true).then(function() {
+              return fulfill(formData);
+            })["catch"](function(err) {
+              return reject(err);
+            });
+          });
+        };
+      })(this));
     };
 
-    this.collectFormData = function(form) {
-      var result = {
-        body:       form.getElementsByClassName("text")[0].value.trim(),
-        file:       form.getElementsByClassName("file")[0].files[0],
-        created_at: Time.timestamp(),
-        parent:     form.getElementsByClassName("parent")[0].value,
-      }
+    Forms.prototype.processFiles = function(formData) {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          var image, reader;
+          if (!formData.file) {
+            delete formData.file;
+            return fulfill(formData);
+          }
+          image = document.createElement("img");
+          reader = new FileReader();
+          reader.onload = function(event) {
+            return image.src = event.target.result;
+          };
+          image.onload = function() {
+            var canvas, ctx, hash, height, imageFull, imageThumb, maxHeight, maxWidth, width;
+            canvas = document.createElement("canvas");
+            ctx = canvas.getContext("2d");
+            canvas.width = image.width;
+            canvas.height = image.height;
+            ctx.drawImage(image, 0, 0, image.width, image.height);
+            imageFull = canvas.toDataURL("image/jpeg", 1).split(',')[1];
+            maxWidth = 200;
+            maxHeight = 200;
+            width = image.width;
+            height = image.height;
+            if (width > height) {
+              if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            ctx = canvas.getContext("2d");
+            ctx.drawImage(image, 0, 0, width, height);
+            imageThumb = canvas.toDataURL("image/jpeg", 1).split(',')[1];
+            hash = md5(imageFull);
+            return Nullchan.uploadFile(imageFull, hash + ".jpg", false).then(function(fullPath) {
+              return Nullchan.uploadFile(imageThumb, hash + "-thumb.jpg", false).then(function(thumbPath) {
+                formData.file_thumb = thumbPath;
+                formData.file_full = fullPath;
+                delete formData.file;
+                return fulfill(formData);
+              });
+            });
+          };
+          return reader.readAsDataURL(formData.file);
+        };
+      })(this));
+    };
 
+    Forms.prototype.collectFormData = function(form) {
+      var name, result;
+      result = {
+        body: form.getElementsByClassName("text")[0].value.trim(),
+        file: form.getElementsByClassName("file")[0].files[0],
+        created_at: Time.timestamp(),
+        parent: form.getElementsByClassName("parent")[0].value
+      };
       if (!!!result.parent) {
         result.parent = null;
       }
-
-      var name = form.getElementsByClassName("name")[0];
-      result.anonymous = (name.options[name.selectedIndex].value == "anonymous");
+      name = form.getElementsByClassName("name")[0];
+      result.anonymous = name.options[name.selectedIndex].value === "anonymous";
       return result;
-    }
-
-    this.updateAuthForms = function(state) {
-      return new Promise(function(fulfill, reject) {
-        var auths = document.getElementsByClassName("auth-form");
-        for (var i = 0; i < auths.length; i++) {
-          auths[i].innerHTML = Templates.render("auth-form", { user: Nullchan.shortUserName() });
-        };
-        fulfill();
-      })
     };
 
-    this.callReplyForm = function(event) {
-      var post   = event.target.parentNode.parentNode.parentNode;
-      var thread = post.parentNode;
-      var hash   = thread.dataset.hashsum;
+    Forms.prototype.updateAuthForms = function(state) {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          var auth, i, len, ref;
+          ref = document.getElementsByClassName("auth-form");
+          for (i = 0, len = ref.length; i < len; i++) {
+            auth = ref[i];
+            auth.innerHTML = Templates.render("auth-form", {
+              user: Nullchan.shortUserName()
+            });
+          }
+          return fulfill();
+        };
+      })(this));
+    };
 
+    Forms.prototype.callReplyForm = function(event) {
+      var el, hash, post, replyForm, thread;
+      post = event.target.parentNode.parentNode.parentNode;
+      thread = post.parentNode;
+      hash = thread.dataset.hashsum;
       if (!replyForm) {
-        var el = document.createElement("div");
+        el = document.createElement("div");
         el.innerHTML = Templates.render("form");
         replyForm = el.firstChild;
         replyForm.id = "reply-form";
         replyForm.addEventListener("submit", this.handleSubmit);
       }
-
       thread.insertBefore(replyForm, post.nextSibling);
       replyForm.style.display = "table";
       replyForm.getElementsByClassName("text")[0].focus();
       replyForm.getElementsByClassName("parent")[0].value = hash;
-      console.log(hash);
-      this.updateAuthForms();
+      return this.updateAuthForms();
     };
 
-    this.clearForm = function(form) {
-      form.reset();
+    Forms.prototype.clearForm = function(form) {
+      return form.reset();
     };
-  });
+
+    return Forms;
+
+  })();
 
   window.Forms = new Forms();
-})();
+
+}).call(this);
 
 
-
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/header.js ---- */
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/header.coffee ---- */
 
 
 (function() {
-  var Header = Class.extend(function() {
-    var element;
+  var Header,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-    this.constructor = function() {
-      element = document.getElementById("header");
-    };
+  Header = (function() {
+    Header.element = null;
 
-    this.update = function(siteInfo, settings) {
-      element.outerHTML = Templates.render("header", { 
-        boardName:  "Development",//settings.boardName,
-        peers:      siteInfo.settings.peers,
-        siteSize:   formatSizeUnits(siteInfo.settings.size),
+    function Header() {
+      this.update = bind(this.update, this);
+      this.element = document.getElementById("header");
+    }
+
+    Header.prototype.update = function(siteInfo, settings) {
+      this.element.outerHTML = Templates.render("header", {
+        boardName: "Development",
+        peers: siteInfo.settings.peers,
+        siteSize: formatSizeUnits(siteInfo.settings.size)
       });
-      element = document.getElementById("header");
+      return this.element = document.getElementById("header");
     };
-  });
 
-  window.Header = new Header()
-})();
+    return Header;
+
+  })();
+
+  window.Header = new Header();
+
+}).call(this);
 
 
-
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/markup.js ---- */
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/markup.coffee ---- */
 
 
 (function() {
-  var Markup = Class.extend(function() {
-    var expressions;
-    var htmlEntityMap = {
+  var Markup,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Markup = (function() {
+    function Markup() {
+      this.escapeHTML = bind(this.escapeHTML, this);
+      this.render = bind(this.render, this);
+    }
+
+    Markup.prototype.htmlEntityMap = {
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       '"': '&quot;',
       "'": '&#39;',
-      "/": '&#x2F;',
+      "/": '&#x2F;'
     };
 
-    this.constructor = function() {
-      var r;
-      expressions = [
-        // quote
-        [(re = /^\s*&gt;\s{0,1}(.+?)$/mg), function(match, content) {
-          if (content.substring(0, 3) == "&gt;") {
-            console.log('dick');
+    Markup.prototype.expressions = [
+      [
+        /^\s*&gt;\s{0,1}(.+?)$/mg, (function(match, content) {
+          var br;
+          if (content.substring(0, 3) === "&gt;") {
             return match;
           }
-          var br = "";
-          if (match[0] == "\n") {
+          br = "";
+          if (match[0] === "\n") {
             br = "<br>";
           }
-
-          return (br + "<em class='quote'>&gt; " + content + "</em>");
-        }],
-
-        // bold
-        [(re = /\*\*([\s\S]+?)\*\*/mg), '<em class="bold">$1</em>'],
-
-        // italic
-        [(re =/\*([\s\S]+?)\*/mg), '<em class="italic">$1</em>'],
-
-        // underline
-        [(re = /(^|\s|\A)__([\s\S]+?)__(\s|\z|$)/mg), '$1<em class="underline">$2</em>$3'],
-
-        // strike
-        [(re = /\^([\s\S]+?)\^/mg), function(match, text) {
+          return br + "<em class='quote'>&gt; " + content + "</em>";
+        })
+      ], [/\*\*([\s\S]+?)\*\*/mg, '<em class="bold">$1</em>'], [/\*([\s\S]+?)\*/mg, '<em class="italic">$1</em>'], [/(^|\s|\A)__([\s\S]+?)__(\s|\z|$)/mg, '$1<em class="underline">$2</em>$3'], [
+        /\^([\s\S]+?)\^/mg, (function(match, text) {
           if (text.match(/^_+$/)) {
             return match;
-          } else {
-            return ("<em class='strike'>" + text + "</em>");
           }
-        }],
+          return "<em class='strike'>" + text + "</em>";
+        })
+      ], [/%%([\s\S]+?)%%/mg, '<em class="spoiler">$1</em>'], [/\r?\n/g, "\n"], [/\n/g, '<br>'], [/(<br>){2,}/g, '<br><br>']
+    ];
 
-        // spoiler 
-        [(re = /%%([\s\S]+?)%%/mg), '<em class="spoiler">$1</em>'],
-
-        // line breaks
-        [(re = /\r?\n/g), "\n"],
-        [(re = /\n/g), '<br>'],
-        [(re = /(<br>){2,}/g), '<br><br>'],
-      ];
-    };
-
-    this.render = function(content) {
+    Markup.prototype.render = function(content) {
+      var exp, i, len, ref;
       content = this.escapeHTML(content);
       content = content.trim();
-
-      for (var i = 0; i < expressions.length; i++) {
-        content = content.replace(expressions[i][0], expressions[i][1]);
-      };
-
+      ref = this.expressions;
+      for (i = 0, len = ref.length; i < len; i++) {
+        exp = ref[i];
+        content = content.replace(exp[0], exp[1]);
+      }
       return content;
     };
 
-    this.escapeHTML = function(raw) {
-      return String(raw).replace(/[&<>"'\/]/g, function(s) {
-        return htmlEntityMap[s];
-      }.bind(this))
+    Markup.prototype.escapeHTML = function(raw) {
+      return String(raw).replace(/[&<>"'\/]/g, (function(_this) {
+        return function(s) {
+          return _this.htmlEntityMap[s];
+        };
+      })(this));
     };
-  });
+
+    return Markup;
+
+  })();
 
   window.Markup = new Markup();
-})();
+
+}).call(this);
 
 
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/templates.js ---- */
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/templates.coffee ---- */
 
 
 (function() {
-  var Templates = Class.extend(function() {
-    var templates;
+  var Templates,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-    this.constructor = function() {
-      // console.log("Loading templates...");
-      templates = {};
-      var scripts = document.getElementsByClassName("template");
-      var i;
-
-      for (i = 0; i < scripts.length; i++) {
-        var name = scripts[i].id.replace("-template", "");
-        templates[name] = scripts[i].innerHTML.trim();
-        Mustache.parse(templates[name]);
-        // console.log(" - template `" + name + "` loaded.");
+  Templates = (function() {
+    function Templates() {
+      this.render = bind(this.render, this);
+      var i, len, name, ref, script;
+      this.templates = {};
+      ref = document.getElementsByClassName("template");
+      for (i = 0, len = ref.length; i < len; i++) {
+        script = ref[i];
+        name = script.id.replace("-template", "");
+        this.templates[name] = script.innerHTML.trim();
+        Mustache.parse(this.templates[name]);
       }
+    }
+
+    Templates.prototype.render = function(templateName, data) {
+      return Mustache.render(this.templates[templateName], data);
     };
 
-    this.render = function(templateName, data) {
-      return Mustache.render(templates[templateName], data);
-    };
-  })
+    return Templates;
 
-  window.Templates = new Templates;
-})();
+  })();
 
+  window.Templates = new Templates();
 
-
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/threads.js ---- */
+}).call(this);
 
 
-(function() { 
-  var Threads = Class.extend(function() {
-    var container;
-    var cachedPosts;
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/threads.coffee ---- */
 
-    this.constructor = function() {
-      container = document.getElementById("container");
-    };
 
-    this.showList = function() {
-      return new Promise(function(fulfill, reject) {
-        container.innerHTML = "";
-        this.drawButton();
-        this.loadThreads().then(function(threads) {
-          for (var i = 0; i < threads.length; i++) {
-            var cnt = this.renderThread(threads[i], false);
-            if (cnt) {
-              container.appendChild(cnt);
+(function() {
+  var Threads, sortPosts, sortThreads,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  Threads = (function() {
+    Threads.prototype.container = null;
+
+    Threads.prototype.cachedPosts = null;
+
+    function Threads() {
+      this.bindEvents = bind(this.bindEvents, this);
+      this.expandThread = bind(this.expandThread, this);
+      this.drawButton = bind(this.drawButton, this);
+      this.appendPost = bind(this.appendPost, this);
+      this.loadThreads = bind(this.loadThreads, this);
+      this.preparePostInfo = bind(this.preparePostInfo, this);
+      this.renderThread = bind(this.renderThread, this);
+      this.showList = bind(this.showList, this);
+      this.container = document.getElementById("container");
+    }
+
+    Threads.prototype.showList = function() {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          container.innerHTML = "";
+          _this.drawButton();
+          return _this.loadThreads().then(function(threads) {
+            var cnt, i, len, thread;
+            for (i = 0, len = threads.length; i < len; i++) {
+              thread = threads[i];
+              if ((cnt = _this.renderThread(thread, false))) {
+                container.appendChild(cnt);
+              }
             }
-          };
-          this.bindEvents();
-          fulfill();
-        }.bind(this));
-      }.bind(this))
+            _this.bindEvents();
+            return fulfill();
+          });
+        };
+      })(this));
     };
 
-    this.renderThread = function(data, full) {
-      var posts = data;
-      var thread = document.createElement("div");
-
-      if (data[0] == null) {
+    Threads.prototype.renderThread = function(data, full) {
+      var i, len, post, posts, thread;
+      posts = data;
+      thread = document.createElement("div");
+      if (data[0] === null) {
         return false;
       }
-
-      thread.id = ("thread-" + data[0].hashsum);
+      thread.id = "thread-" + data[0].hashsum;
       thread.dataset.hashsum = data[0].hashsum;
       thread.className = "thread";
-
-      if (posts.length > 6 && full != true) {
-        posts = [posts[0], "expand"].concat(posts.slice(posts.length-5, posts.length));
+      if (posts.length > 6 && full !== true) {
+        posts = [posts[0], "expand"].concat(posts.slice(posts.length - 5, posts.length));
       }
-
-      for (var i = 0; i < posts.length; i++) {
-        if (posts[i] == "expand") {
-          thread.innerHTML += Templates.render("skip-gap", { count: (data.length - 6) });
+      for (i = 0, len = posts.length; i < len; i++) {
+        post = posts[i];
+        if (post === "expand") {
+          thread.innerHTML += Templates.render("skip-gap", {
+            count: data.length - 6
+          });
           continue;
         }
-
-        this.preparePostInfo(posts[i]);
-        thread.innerHTML += Templates.render("post", { post: posts[i] });
-      };
-
-      return(thread);
+        this.preparePostInfo(post);
+        thread.innerHTML += Templates.render("post", {
+          post: post
+        });
+      }
+      return thread;
     };
 
-    this.preparePostInfo = function(post) {
+    Threads.prototype.preparePostInfo = function(post) {
       post.time = Time.since(post.created_at);
-
       if (!post.processed) {
         post.original_body = post.body;
         post.hashsum_short = post.hashsum.substring(22, 32);
         post.body = Markup.render(post.original_body);
         post.user = Nullchan.shortUserName(post.cert_user_id);
-        post.processed = true;
+        return post.processed = true;
       }
     };
 
-    this.loadThreads = function() {
-      return new Promise(function(fulfill, reject) {
-        var query = ("SELECT message.*, keyvalue.value AS cert_user_id FROM message " + 
-          "LEFT JOIN json AS data_json USING (json_id) " + 
-          "LEFT JOIN json AS content_json ON (" + 
-             "data_json.directory = content_json.directory AND content_json.file_name = 'content.json'" + 
-          ")" + 
-          "LEFT JOIN keyvalue ON (keyvalue.key = 'cert_user_id' AND keyvalue.json_id = content_json.json_id)")
-
-        Nullchan.cmd("dbQuery", query, function(data) {
-          var posts = {};
-          var threads = [];
-
-          for (var i = 0; i < data.length; i++) {
-            var post = data[i];
-            var threadHash = (post.parent || post.hashsum);
-
-            if (!!!posts[threadHash]) {
-              posts[threadHash] = { opening: null, replies: [] };
+    Threads.prototype.loadThreads = function() {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          var query;
+          query = 'SELECT message.*, keyvalue.value AS cert_user_id FROM message        \nLEFT JOIN json AS data_json USING (json_id)\nLEFT JOIN json AS content_json ON (\n  data_json.directory = content_json.directory AND content_json.file_name = \'content.json\'\n)\nLEFT JOIN keyvalue ON (keyvalue.key = \'cert_user_id\' AND keyvalue.json_id = content_json.json_id)';
+          return Nullchan.cmd("dbQuery", query, function(data) {
+            var hash, i, len, post, posts, threadHash, threads;
+            posts = {};
+            threads = [];
+            for (i = 0, len = data.length; i < len; i++) {
+              post = data[i];
+              threadHash = post.parent || post.hashsum;
+              if (!!!posts[threadHash]) {
+                posts[threadHash] = {
+                  opening: null,
+                  replies: []
+                };
+              }
+              if (post.parent === null) {
+                posts[threadHash].opening = post;
+              } else {
+                posts[threadHash].replies.push(post);
+              }
             }
-
-            if (post.parent == null) {
-              posts[threadHash].opening = post;
-            } else {
-              posts[threadHash].replies.push(post);
+            _this.cachedPosts = posts;
+            for (hash in posts) {
+              post = posts[hash];
+              threads.push([post.opening].concat(post.replies.sort(sortPosts)));
             }
-          };
-
-          cachedPosts = posts;
-
-          for (var hash in posts) {
-            if (posts.hasOwnProperty(hash)) {
-              threads.push([posts[hash].opening].concat(posts[hash].replies.sort(sortPosts)))
-            }
-          }
-
-          fulfill(threads.sort(sortThreads))
-        }.bind(this));
-      }.bind(this));
+            return fulfill(threads.sort(sortThreads));
+          });
+        };
+      })(this));
     };
 
-    this.appendPost = function(post) {
-      var thread = document.getElementById("thread-" + post.parent);
-
+    Threads.prototype.appendPost = function(post) {
+      var thread;
+      thread = document.getElementById("thread-" + post.parent);
       if (!thread) {
         return false;
       }
-
       this.preparePostInfo(post);
-      if (cachedPosts[post.parent]) {
-        cachedPosts[post.parent].replies.push(post);
+      if (this.cachedPosts[post.parent]) {
+        this.cachedPosts[post.parent].replies.push(post);
       }
-      thread.innerHTML += Templates.render("post", { post: post });
+      return thread.innerHTML += Templates.render("post", {
+        post: post
+      });
     };
 
-    this.drawButton = function() {
-      container.innerHTML = Templates.render("form-call-button", { text: "start new thread" });
-      document.getElementById("form-call-button").addEventListener("click", Forms.showTopForm);
+    Threads.prototype.drawButton = function() {
+      container.innerHTML = Templates.render("form-call-button", {
+        text: "start new thread"
+      });
+      return document.getElementById("form-call-button").addEventListener("click", Forms.showTopForm);
     };
 
-    this.expandThread = function(event) {
-      var gap     = event.target;
-
-      if (gap.className == "expand-button") {
+    Threads.prototype.expandThread = function(event) {
+      var data, gap, posts, thread;
+      gap = event.target;
+      if (gap.className === "expand-button") {
         gap = gap.parentNode;
       }
-
-      var thread  = gap.parentNode;
-      var posts   = cachedPosts[thread.dataset.hashsum];
+      thread = gap.parentNode;
+      posts = this.cachedPosts[thread.dataset.hashsum];
       gap.innerHTML = "loading...";
-
       if (!posts) {
         alert("Thread not found, wtf?");
         return false;
       }
-
-      var data = [posts.opening].concat(posts.replies.sort(this.sortPosts));
-      thread.innerHTML = this.renderThread(data, true).innerHTML;
+      data = [posts.opening].concat(posts.replies.sort(sortPosts));
+      return thread.innerHTML = this.renderThread(data, true).innerHTML;
     };
 
-    this.bindEvents = function() {
-      container.addEventListener("click", function(event) {
-        if (event.target.className == "skip-gap" || event.target.className == "expand-button") {
-          this.expandThread(event);
-        }
-        try {
-          if (event.target.parentNode.className == "time-and-id") {
-            Forms.callReplyForm(event);
+    Threads.prototype.bindEvents = function() {
+      return container.addEventListener("click", (function(_this) {
+        return function(event) {
+          var err, error, ref;
+          if ((ref = event.target.className) === "skip-gap" || ref === "expand-button") {
+            _this.expandThread(event);
           }
-        } catch(err) {}
-      }.bind(this))
+          try {
+            if (event.target.parentNode.className === "time-and-id") {
+              return Forms.callReplyForm(event);
+            }
+          } catch (error) {
+            err = error;
+          }
+        };
+      })(this));
     };
-  });
 
-  function sortPosts(a, b) {
-    if (a.created_at > b.created_at) {
-      return 1;
-    }
-    return -1;
-  }
+    return Threads;
 
-  function sortThreads(a, b) {
-    if (a[a.length-1].created_at > b[b.length-1].created_at) {
+  })();
+
+  sortPosts = (function(_this) {
+    return function(a, b) {
+      if (a.created_at > b.created_at) {
+        return 1;
+      }
       return -1;
-    }
-    return 1;
-  }
+    };
+  })(this);
+
+  sortThreads = (function(_this) {
+    return function(a, b) {
+      if (a[a.length - 1].created_at > b[b.length - 1].created_at) {
+        return -1;
+      }
+      return 1;
+    };
+  })(this);
 
   window.Threads = new Threads();
-})();
+
+}).call(this);
 
 
 
-/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/z.js ---- */
+/* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/z.coffee ---- */
 
 
-(function() { 
-  var Nullchan = ZeroFrame.extend(function() {
-    var initialized = false;
-    var settings;
-    var siteInfo;
-    var container;
-    var preloader;
+(function() {
+  var Nullchan,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
 
-    this.init = function() {
-      container = document.getElementById("container");
-      preloader = document.getElementById("preloader");
+  Nullchan = (function(superClass) {
+    extend(Nullchan, superClass);
+
+    function Nullchan() {
+      this.uploadFile = bind(this.uploadFile, this);
+      this.displayError = bind(this.displayError, this);
+      this.shortUserName = bind(this.shortUserName, this);
+      this.togglePreloader = bind(this.togglePreloader, this);
+      this.getSiteInfo = bind(this.getSiteInfo, this);
+      this.determineRoute = bind(this.determineRoute, this);
+      this.loadSettings = bind(this.loadSettings, this);
+      this.loadSiteInfo = bind(this.loadSiteInfo, this);
+      this.updateSiteInfo = bind(this.updateSiteInfo, this);
+      this.route = bind(this.route, this);
+      this.onOpenWebsocket = bind(this.onOpenWebsocket, this);
+      this.init = bind(this.init, this);
+      return Nullchan.__super__.constructor.apply(this, arguments);
+    }
+
+    Nullchan.prototype.initialized = false;
+
+    Nullchan.prototype.settings = null;
+
+    Nullchan.prototype.siteInfo = null;
+
+    Nullchan.prototype.container = null;
+
+    Nullchan.prototype.preloader = null;
+
+    Nullchan.prototype.init = function() {
+      this.container = document.getElementById("container");
+      return this.preloader = document.getElementById("preloader");
     };
 
-    this.onOpenWebsocket = function(event) {
-      if (!initialized) {
-        initialized = true;
-        this.loadSettings().then(function() {
-          this.loadSiteInfo().then(function(newInfo) {
-            this.updateSiteInfo(newInfo);
-            this.determineRoute();
-          }.bind(this));
-        }.bind(this));
+    Nullchan.prototype.onOpenWebsocket = function(event) {
+      if (!this.initialized) {
+        this.initialized = true;
+        return this.loadSettings().then((function(_this) {
+          return function() {
+            return _this.loadSiteInfo().then(function(newInfo) {
+              _this.updateSiteInfo(newInfo);
+              return _this.determineRoute();
+            });
+          };
+        })(this));
       }
     };
 
-    this.route = function(command, message) {
-      if (command == "setSiteInfo") {
-        this.updateSiteInfo(message.params);
-        
+    Nullchan.prototype.route = function(command, message) {
+      if (command === "setSiteInfo") {
+        return this.updateSiteInfo(message.params);
       }
     };
 
-    this.updateSiteInfo = function(newInfo) {
-      siteInfo = newInfo;
-      Header.update(siteInfo, settings);
-      Forms.updateAuthForms();
+    Nullchan.prototype.updateSiteInfo = function(newInfo) {
+      this.siteInfo = newInfo;
+      Header.update(this.siteInfo, this.settings);
+      return Forms.updateAuthForms();
     };
 
-    this.loadSiteInfo = function() {
-      return new Promise(function(fulfill, reject) {
-        this.cmd("siteInfo", {}, function(newInfo) {
-          fulfill(newInfo);
-        })
-      }.bind(this));
-    }
-
-    this.loadSettings = function() {
-      return new Promise(function(fulfill, reject) {
-        this.cmd("fileGet", { inner_path: "data/settings.json", required: true }, function(data) {
-          try {
-            settings = JSON.parse(data);
-          } catch(err) {
-            alert("Fix your settings file!")
-            settings = {}
-          }
-          fulfill();
-        }.bind(this));
-      }.bind(this));
-    }
-
-    this.determineRoute = function() {
-      Threads.showList(this.cmd).then(function() { 
-        this.togglePreloader(false);
-      }.bind(this));
+    Nullchan.prototype.loadSiteInfo = function() {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          return _this.cmd("siteInfo", {}, function(newInfo) {
+            return fulfill(newInfo);
+          });
+        };
+      })(this));
     };
 
-    this.getSiteInfo = function() {
-      return siteInfo;
+    Nullchan.prototype.loadSettings = function() {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          return _this.cmd("fileGet", {
+            inner_path: "data/settings.json",
+            required: true
+          }, function(data) {
+            var err, error, settings;
+            try {
+              settings = JSON.parse(data);
+            } catch (error) {
+              err = error;
+              alert("Fix your settings file!");
+              settings = {};
+            }
+            return fulfill();
+          });
+        };
+      })(this));
     };
 
-    this.togglePreloader = function(state) {
-      var off, on;
+    Nullchan.prototype.determineRoute = function() {
+      return Threads.showList(this.cmd).then((function(_this) {
+        return function() {
+          return _this.togglePreloader(false);
+        };
+      })(this));
+    };
 
-      if (state == true) {
-        off = container;
-        on  = preloader;
+    Nullchan.prototype.getSiteInfo = function() {
+      return this.siteInfo;
+    };
+
+    Nullchan.prototype.togglePreloader = function(state) {
+      var active, inactive;
+      if (state === true) {
+        inactive = container;
+        active = preloader;
       } else {
-        off = preloader;
-        on  = container;
+        inactive = preloader;
+        active = container;
       }
-
-      off.style.display = "none";
-      on.style.display = "block";
-      on.className = "fadein";
-
-      setTimeout(function() {
-        on.className = "";
-      }.bind(this), 1100)
+      inactive.style.display = "none";
+      active.style.display = "block";
+      active.className = "fadein";
+      return setTimeout(((function(_this) {
+        return function() {
+          return true.className = "";
+        };
+      })(this)), 1100);
     };
 
-    this.shortUserName = function(full) {
+    Nullchan.prototype.shortUserName = function(full) {
       if (!full) {
-        full = siteInfo.cert_user_id;
+        full = this.siteInfo.cert_user_id;
       }
-      if (full == "edisontrent@zeroid.bit") {
-        return "[dev] Edison Trent";
+      if (full === "edisontrent@zeroid.bit") {
+        return "[dev] edisontrent";
       }
       if (!full) {
         return full;
       }
-
       return full.split("@")[0];
     };
 
-    this.displayError = function(text) {
-      this.cmd("wrapperNotification", ["error", text, 5000]);
+    Nullchan.prototype.displayError = function(text) {
+      return this.cmd("wrapperNotification", ["error", text, 5000]);
     };
 
-    this.uploadFile = function(rawBase64, fileName, publish) {
-      return new Promise(function(fulfill, reject) {
-        var dir  = ("data/users/" + siteInfo.auth_address + "/");
-        var path = (dir + fileName);
-
-        this.cmd("fileWrite", [path, rawBase64], function(write) {
-          if (write == "ok") {
-            if (publish == false) {
-              fulfill(path);
+    Nullchan.prototype.uploadFile = function(rawBase64, fileName, publish) {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          var dir, path;
+          dir = "data/users/" + _this.siteInfo.auth_address + "/";
+          path = dir + fileName;
+          return _this.cmd("fileWrite", [path, rawBase64], function(write) {
+            if (write === "ok") {
+              if (publish === false) {
+                return fulfill(path);
+              } else {
+                return _this.cmd("sitePublish", {
+                  "inner_path": path
+                }, function(publish) {
+                  if (publish === "ok") {
+                    return fulfill(path);
+                  } else {
+                    return reject(publish);
+                  }
+                });
+              }
             } else {
-              this.cmd("sitePublish", { "inner_path": path }, function(publish) {
-                if (publish == "ok") {
-                  fulfill(path);
-                } else {
-                  reject(publish);
-                }
-              })
+              return reject(write);
             }
-          } else {
-            reject(write);
-          }
-        }.bind(this));
-      }.bind(this));
+          });
+        };
+      })(this));
     };
-  });
+
+    return Nullchan;
+
+  })(ZeroFrame);
 
   window.Nullchan = new Nullchan();
-})();
+
+}).call(this);
