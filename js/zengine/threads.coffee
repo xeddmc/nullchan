@@ -1,18 +1,50 @@
 class Threads
   container:    null
   cachedPosts:  null
+  current:      null
 
   constructor: ->
     @container = document.getElementById("container")
 
+  currentThread: => @current
+
+  showThread: (hashsum) =>
+    new Promise (fulfill, reject) =>
+      parent = encodeURI(hashsum)
+      query  = "SELECT message.* FROM message WHERE message.hashsum = '#{parent}'"
+
+      Nullchan.cmd 'dbQuery', query, (opening) =>
+        if opening.length == 0
+          @renderNotFound()
+          return fulfill()
+
+        @current = parent
+        query = """
+          SELECT message.*, keyvalue.value AS cert_user_id FROM message
+          LEFT JOIN json AS data_json USING (json_id)
+          LEFT JOIN json AS content_json ON (
+            data_json.directory = content_json.directory AND content_json.file_name = 'content.json'
+          )
+          LEFT JOIN keyvalue ON (keyvalue.key = 'cert_user_id' AND keyvalue.json_id = content_json.json_id)
+          WHERE message.hashsum = '#{@current}' OR message.parent = '#{@current}'
+          ORDER BY message.created_at ASC
+        """
+
+        Nullchan.cmd 'dbQuery', query, (data) =>
+          @container.innerHTML = ""
+          @drawButton("reply to thread")
+          @container.appendChild(@renderThread(data, true))
+          @bindEvents()
+          fulfill()
+
   showList: =>
     new Promise (fulfill, reject) =>
-      container.innerHTML = ""
-      @drawButton()
+      @container.innerHTML = ""
+      @drawButton("start new thread")
       @loadThreads().then (threads) =>
-        for thread in threads
+        for thread in threads[0..20]
           if (cnt = @renderThread(thread, false))
-            container.appendChild(cnt)
+            @container.appendChild(cnt)
         @bindEvents()
         fulfill()
 
@@ -47,11 +79,12 @@ class Threads
       post.body = Markup.render(post.original_body)
       post.user = Nullchan.shortUserName(post.cert_user_id)
       post.processed = true
+      post.button = (!!!post.parent and Nullchan.currentPage() == "list")
 
   loadThreads: =>
     new Promise (fulfill, reject) =>
       query = '''
-        SELECT message.*, keyvalue.value AS cert_user_id FROM message        
+        SELECT message.*, keyvalue.value AS cert_user_id FROM message
         LEFT JOIN json AS data_json USING (json_id)
         LEFT JOIN json AS content_json ON (
           data_json.directory = content_json.directory AND content_json.file_name = 'content.json'
@@ -85,12 +118,13 @@ class Threads
       return false
 
     @preparePostInfo(post)
-    if @cachedPosts[post.parent]
+    if @cachedPosts?[post.parent]
       @cachedPosts[post.parent].replies.push(post)
     thread.innerHTML += Templates.render("post", { post: post })
+    document.getElementById("post-#{post.hashsum_short}").scrollIntoView()
 
-  drawButton: =>
-    container.innerHTML = Templates.render("form-call-button", { text: "start new thread" })
+  drawButton: (text) =>
+    container.innerHTML = Templates.render("form-call-button", { text })
     document.getElementById("form-call-button").addEventListener("click", Forms.showTopForm)
 
   expandThread: (event) =>
@@ -107,6 +141,9 @@ class Threads
 
     data = [posts.opening].concat(posts.replies.sort(sortPosts))
     thread.innerHTML = @renderThread(data, true).innerHTML
+
+  renderNotFound: =>
+    @container.innerHTML = Templates.render("not-found")
 
   bindEvents: =>
     container.addEventListener "click", (event) =>

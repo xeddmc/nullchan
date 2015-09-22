@@ -5,8 +5,8 @@
   "domain": "dev.0chan.bit", 
   "files": {
     "css/all.css": {
-      "sha512": "608161ec2dc60c527ca3c28e1403836342a7ddd1357fcb247ca8a8197c29fbd0", 
-      "size": 7967
+      "sha512": "90b5510004a4ae414b170355467974c86f06b43b7344ea18383868ff12f60eb1", 
+      "size": 8462
     }, 
     "data/settings.json": {
       "sha512": "b0ba200b6fe2e745cd4364f1afe98d4707975647e1e90c1fb8c832dadd88d994", 
@@ -21,12 +21,12 @@
       "size": 4852
     }, 
     "index.html": {
-      "sha512": "eb8a8852f18c2610da104baaf7212c111a1405c9279496fec68deba22b864504", 
-      "size": 3475
+      "sha512": "455b7ba80bfa4dbe36429ca8c02ff86c6422e6bf59ae21f6167a68ec13d644b8", 
+      "size": 3883
     }, 
     "js/all.js": {
-      "sha512": "c5ff5a8a7cbabf11bb7c6da5c9bbb790d9c387b5d018010967befbebbf178d86", 
-      "size": 46174
+      "sha512": "8489856fa6c0235ab1d20712910bec272dc0474151f400aa229fa9a03ea529df", 
+      "size": 49216
     }
   }, 
   "ignore": "(.git|data/users|data/0chan.db|js/lib|css/lib|js/zengine).*", 
@@ -36,14 +36,14 @@
       "signers_required": 1
     }
   }, 
-  "modified": 1442919205.095574, 
+  "modified": 1442958398.774033, 
   "sign": [
-    62536136851511944971060167767400584077886728719799260734877164417097121279497, 
-    110383306131612985316785780595338285351888628298517656086815504636144957172009
+    89595581846429965824795422139913284303599033756410144996887522658521136375493, 
+    103682547109484436340121007985347550726312884648905113449928756043937176047219
   ], 
   "signers_sign": "HEEFf+vCP4aoQW61BjKcTwKboCruKMov5K1vE8lxeijrf4uDTfkcqJWKyeG4pyNo5a7yd8YJo99Wr9cxys/l9mM=", 
   "signs": {
-    "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag": "HKHgSWtfpSXT7kya+5vMnCjwldktzl5TqjGy8nfm/7fKL+HyXxVTjqbo5qEYrfRi6k9BY2hMdSuyNAvvsZwg0tY="
+    "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag": "HNTsCEIpb1otXeDW2NqsDw1v49VbrxuG6lbIoDiSWbIdokNVwOavC3TLOz3q+FEwObSrdlgB7Q7iz3TSAGGgOlA="
   }, 
   "signs_required": 1, 
   "title": "dev.0chan", 

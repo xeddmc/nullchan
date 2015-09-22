@@ -7,11 +7,14 @@ class Forms
     element = document.createElement("div")
     element.innerHTML = Templates.render("form")
 
-    topForm = element.firstChild
-    button.parentNode.replaceChild(topForm, button)
-    topForm.getElementsByClassName("text")[0].focus()
+    @topForm = element.firstChild
+    button.parentNode.replaceChild(@topForm, button)
+    @topForm.getElementsByClassName("text")[0].focus()
 
-    @updateAuthForms().then => @bindEvents(topForm)
+    if Nullchan.currentPage() != "list"
+      @topForm.getElementsByClassName("parent")[0].value = Threads.currentThread()
+
+    @updateAuthForms().then => @bindEvents(@topForm)
 
   bindEvents: (form) =>
     form.addEventListener("submit", @handleSubmit)
@@ -43,8 +46,8 @@ class Forms
         @blurForm(form, false)
         @clearForm(form)
 
-        if form.id == "reply-form"
-          form.style.display = "none"
+        if form.id == "reply-form" or Nullchan.currentPage() == "thread"
+          form.style.display = "none" if form.id == "reply-form"
           Threads.appendPost(newPost)
         else 
           Nullchan.determineRoute()

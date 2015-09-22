@@ -173,9 +173,10 @@ hr {
   text-align: center;
   cursor: pointer;
   color: #aaa;
-  /*margin-bottom: 40px;*/
   font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
+  display: table;
+  margin: 0 auto;
 }
 
 #stats {
@@ -521,4 +522,39 @@ em.quote {
 
 .thread-link {
   display: inline-block;
+  color: #777;
+  margin-left: 5px;
+  text-decoration: none;
+}
+
+.thread-link span {
+  text-decoration: underline;
+  color: #9cc250;
+}
+
+.thread-link:hover {
+  color: #cf6;
+}
+
+.thread-link:hover span {
+  text-decoration: none;
+  color: #cf6;
+}
+
+#not-found {
+  /*background: red;*/
+  text-align: center;
+  margin-top: 50px;
+}
+
+#not-found h1 {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 28px; 
+  color: #ddd;
+  margin: 0px;
+}
+
+#not-found a {
+  color: #777;
+  font-size: 14px;
 }

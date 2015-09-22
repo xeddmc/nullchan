@@ -4,6 +4,7 @@ class Nullchan extends ZeroFrame
   siteInfo:     null
   container:    null
   preloader:    null
+  page:         null
 
   init: =>
     @container = document.getElementById("container")
@@ -26,6 +27,8 @@ class Nullchan extends ZeroFrame
     Header.update(@siteInfo, @settings)
     Forms.updateAuthForms()
 
+  currentPage: => @page
+
   loadSiteInfo: =>
     new Promise (fulfill, reject) =>
       @cmd "siteInfo", {}, (newInfo) => fulfill(newInfo)
@@ -41,7 +44,17 @@ class Nullchan extends ZeroFrame
         fulfill()
 
   determineRoute: =>
-    Threads.showList(@cmd).then => @togglePreloader(false)
+    query = {}
+    for rawPair in window.location.search.substring(1).split('&')
+      pair = rawPair.split('=')
+      query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1])
+
+    if !!query["thread"]
+      @page = "thread"
+      Threads.showThread(query["thread"]).then => @togglePreloader(false)
+    else
+      @page = "list"
+      Threads.showList().then => @togglePreloader(false)
 
   getSiteInfo: =>
     return @siteInfo

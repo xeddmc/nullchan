@@ -20,9 +20,16 @@
     <hr>
   </script>
 
+  <script id="not-found-template" type="x-tmpl-mustache" class="template">
+    <div id="not-found">
+      <h1>Nothing found.</h1>
+      <a target="_parent" href="?">return to index</a>
+    </div>
+  </script>
+
   <script id="post-template" type="x-tmpl-mustache" class="template">
     <div class="post {{#post.parent}}reply{{/post.parent}}{{^post.parent}}opening{{/post.parent}}"
-      data-hashsum={{post.hashsum}}>
+      data-hashsum={{post.hashsum}} id="post-{{post.hashsum_short}}">
       <div class="info">
 
         <div class="time-and-id">
@@ -37,6 +44,10 @@
           </span>
           <em class="post-id">#{{post.hashsum_short}}</em>
         </div>
+
+        {{#post.button}}
+          <a target="_parent" class="thread-link" href="?thread={{post.hashsum}}">[ <span>open thread</span> ]</a>
+        {{/post.button}}
       </div>
       {{#post.file_thumb}}
         <a href="{{post.file_full}}" target="_blank">

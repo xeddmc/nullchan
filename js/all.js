@@ -262,16 +262,19 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     Forms.prototype.replyForm = null;
 
     Forms.prototype.showTopForm = function(event) {
-      var button, element, topForm;
+      var button, element;
       button = document.getElementById("form-call-button");
       element = document.createElement("div");
       element.innerHTML = Templates.render("form");
-      topForm = element.firstChild;
-      button.parentNode.replaceChild(topForm, button);
-      topForm.getElementsByClassName("text")[0].focus();
+      this.topForm = element.firstChild;
+      button.parentNode.replaceChild(this.topForm, button);
+      this.topForm.getElementsByClassName("text")[0].focus();
+      if (Nullchan.currentPage() !== "list") {
+        this.topForm.getElementsByClassName("parent")[0].value = Threads.currentThread();
+      }
       return this.updateAuthForms().then((function(_this) {
         return function() {
-          return _this.bindEvents(topForm);
+          return _this.bindEvents(_this.topForm);
         };
       })(this));
     };
@@ -312,8 +315,10 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
           return _this.uploadPost(modifiedData).then(function(newPost) {
             _this.blurForm(form, false);
             _this.clearForm(form);
-            if (form.id === "reply-form") {
-              form.style.display = "none";
+            if (form.id === "reply-form" || Nullchan.currentPage() === "thread") {
+              if (form.id === "reply-form") {
+                form.style.display = "none";
+              }
               return Threads.appendPost(newPost);
             } else {
               return Nullchan.determineRoute();
@@ -532,10 +537,8 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
         siteSize: formatSizeUnits(siteInfo.settings.size)
       });
       this.element = document.getElementById("header");
-      console.log(document.location);
       if (document.location.pathname === "/") {
         link = document.getElementById("nullchan-link");
-        console.log(link);
         return link.href = "//0chan.bit";
       }
     };
@@ -547,7 +550,6 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
   window.Header = new Header();
 
 }).call(this);
-
 
 
 /* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/markup.coffee ---- */
@@ -670,8 +672,11 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
 
     Threads.prototype.cachedPosts = null;
 
+    Threads.prototype.current = null;
+
     function Threads() {
       this.bindEvents = bind(this.bindEvents, this);
+      this.renderNotFound = bind(this.renderNotFound, this);
       this.expandThread = bind(this.expandThread, this);
       this.drawButton = bind(this.drawButton, this);
       this.appendPost = bind(this.appendPost, this);
@@ -679,20 +684,52 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
       this.preparePostInfo = bind(this.preparePostInfo, this);
       this.renderThread = bind(this.renderThread, this);
       this.showList = bind(this.showList, this);
+      this.showThread = bind(this.showThread, this);
+      this.currentThread = bind(this.currentThread, this);
       this.container = document.getElementById("container");
     }
+
+    Threads.prototype.currentThread = function() {
+      return this.current;
+    };
+
+    Threads.prototype.showThread = function(hashsum) {
+      return new Promise((function(_this) {
+        return function(fulfill, reject) {
+          var parent, query;
+          parent = encodeURI(hashsum);
+          query = "SELECT message.* FROM message WHERE message.hashsum = '" + parent + "'";
+          return Nullchan.cmd('dbQuery', query, function(opening) {
+            if (opening.length === 0) {
+              _this.renderNotFound();
+              return fulfill();
+            }
+            _this.current = parent;
+            query = "SELECT message.*, keyvalue.value AS cert_user_id FROM message\nLEFT JOIN json AS data_json USING (json_id)\nLEFT JOIN json AS content_json ON (\n  data_json.directory = content_json.directory AND content_json.file_name = 'content.json'\n)\nLEFT JOIN keyvalue ON (keyvalue.key = 'cert_user_id' AND keyvalue.json_id = content_json.json_id)\nWHERE message.hashsum = '" + _this.current + "' OR message.parent = '" + _this.current + "'\nORDER BY message.created_at ASC";
+            return Nullchan.cmd('dbQuery', query, function(data) {
+              _this.container.innerHTML = "";
+              _this.drawButton("reply to thread");
+              _this.container.appendChild(_this.renderThread(data, true));
+              _this.bindEvents();
+              return fulfill();
+            });
+          });
+        };
+      })(this));
+    };
 
     Threads.prototype.showList = function() {
       return new Promise((function(_this) {
         return function(fulfill, reject) {
-          container.innerHTML = "";
-          _this.drawButton();
+          _this.container.innerHTML = "";
+          _this.drawButton("start new thread");
           return _this.loadThreads().then(function(threads) {
-            var cnt, i, len, thread;
-            for (i = 0, len = threads.length; i < len; i++) {
-              thread = threads[i];
+            var cnt, i, len, ref, thread;
+            ref = threads.slice(0, 21);
+            for (i = 0, len = ref.length; i < len; i++) {
+              thread = ref[i];
               if ((cnt = _this.renderThread(thread, false))) {
-                container.appendChild(cnt);
+                _this.container.appendChild(cnt);
               }
             }
             _this.bindEvents();
@@ -738,7 +775,8 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
         post.hashsum_short = post.hashsum.substring(22, 32);
         post.body = Markup.render(post.original_body);
         post.user = Nullchan.shortUserName(post.cert_user_id);
-        return post.processed = true;
+        post.processed = true;
+        return post.button = !!!post.parent && Nullchan.currentPage() === "list";
       }
     };
 
@@ -746,7 +784,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
       return new Promise((function(_this) {
         return function(fulfill, reject) {
           var query;
-          query = 'SELECT message.*, keyvalue.value AS cert_user_id FROM message        \nLEFT JOIN json AS data_json USING (json_id)\nLEFT JOIN json AS content_json ON (\n  data_json.directory = content_json.directory AND content_json.file_name = \'content.json\'\n)\nLEFT JOIN keyvalue ON (keyvalue.key = \'cert_user_id\' AND keyvalue.json_id = content_json.json_id)';
+          query = 'SELECT message.*, keyvalue.value AS cert_user_id FROM message\nLEFT JOIN json AS data_json USING (json_id)\nLEFT JOIN json AS content_json ON (\n  data_json.directory = content_json.directory AND content_json.file_name = \'content.json\'\n)\nLEFT JOIN keyvalue ON (keyvalue.key = \'cert_user_id\' AND keyvalue.json_id = content_json.json_id)';
           return Nullchan.cmd("dbQuery", query, function(data) {
             var hash, i, len, post, posts, threadHash, threads;
             posts = {};
@@ -778,23 +816,24 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     };
 
     Threads.prototype.appendPost = function(post) {
-      var thread;
+      var ref, thread;
       thread = document.getElementById("thread-" + post.parent);
       if (!thread) {
         return false;
       }
       this.preparePostInfo(post);
-      if (this.cachedPosts[post.parent]) {
+      if ((ref = this.cachedPosts) != null ? ref[post.parent] : void 0) {
         this.cachedPosts[post.parent].replies.push(post);
       }
-      return thread.innerHTML += Templates.render("post", {
+      thread.innerHTML += Templates.render("post", {
         post: post
       });
+      return document.getElementById("post-" + post.hashsum_short).scrollIntoView();
     };
 
-    Threads.prototype.drawButton = function() {
+    Threads.prototype.drawButton = function(text) {
       container.innerHTML = Templates.render("form-call-button", {
-        text: "start new thread"
+        text: text
       });
       return document.getElementById("form-call-button").addEventListener("click", Forms.showTopForm);
     };
@@ -814,6 +853,10 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
       }
       data = [posts.opening].concat(posts.replies.sort(sortPosts));
       return thread.innerHTML = this.renderThread(data, true).innerHTML;
+    };
+
+    Threads.prototype.renderNotFound = function() {
+      return this.container.innerHTML = Templates.render("not-found");
     };
 
     Threads.prototype.bindEvents = function() {
@@ -861,6 +904,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
 }).call(this);
 
 
+
 /* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/z.coffee ---- */
 
 
@@ -882,6 +926,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
       this.determineRoute = bind(this.determineRoute, this);
       this.loadSettings = bind(this.loadSettings, this);
       this.loadSiteInfo = bind(this.loadSiteInfo, this);
+      this.currentPage = bind(this.currentPage, this);
       this.updateSiteInfo = bind(this.updateSiteInfo, this);
       this.route = bind(this.route, this);
       this.onOpenWebsocket = bind(this.onOpenWebsocket, this);
@@ -898,6 +943,8 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     Nullchan.prototype.container = null;
 
     Nullchan.prototype.preloader = null;
+
+    Nullchan.prototype.page = null;
 
     Nullchan.prototype.init = function() {
       this.container = document.getElementById("container");
@@ -928,6 +975,10 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
       this.siteInfo = newInfo;
       Header.update(this.siteInfo, this.settings);
       return Forms.updateAuthForms();
+    };
+
+    Nullchan.prototype.currentPage = function() {
+      return this.page;
     };
 
     Nullchan.prototype.loadSiteInfo = function() {
@@ -962,11 +1013,29 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     };
 
     Nullchan.prototype.determineRoute = function() {
-      return Threads.showList(this.cmd).then((function(_this) {
-        return function() {
-          return _this.togglePreloader(false);
-        };
-      })(this));
+      var i, len, pair, query, rawPair, ref;
+      query = {};
+      ref = window.location.search.substring(1).split('&');
+      for (i = 0, len = ref.length; i < len; i++) {
+        rawPair = ref[i];
+        pair = rawPair.split('=');
+        query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+      }
+      if (!!query["thread"]) {
+        this.page = "thread";
+        return Threads.showThread(query["thread"]).then((function(_this) {
+          return function() {
+            return _this.togglePreloader(false);
+          };
+        })(this));
+      } else {
+        this.page = "list";
+        return Threads.showList().then((function(_this) {
+          return function() {
+            return _this.togglePreloader(false);
+          };
+        })(this));
+      }
     };
 
     Nullchan.prototype.getSiteInfo = function() {
