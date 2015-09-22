@@ -7,7 +7,7 @@ class Nullchan extends ZeroFrame
 
   init: =>
     @container = document.getElementById("container")
-    @preloader = document.getElementById("preloader")
+    @preloader = document.getElementById("preloader")    
 
   onOpenWebsocket: (event) =>
     unless @initialized

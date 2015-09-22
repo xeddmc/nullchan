@@ -159,17 +159,17 @@ class Forms
     thread = post.parentNode
     hash   = thread.dataset.hashsum
 
-    if !replyForm
+    if !@replyForm
       el = document.createElement("div")
       el.innerHTML = Templates.render("form")
-      replyForm = el.firstChild
-      replyForm.id = "reply-form"
-      replyForm.addEventListener("submit", @handleSubmit)
+      @replyForm = el.firstChild
+      @replyForm.id = "reply-form"
+      @replyForm.addEventListener("submit", @handleSubmit)
 
-    thread.insertBefore(replyForm, post.nextSibling)
-    replyForm.style.display = "table"
-    replyForm.getElementsByClassName("text")[0].focus()
-    replyForm.getElementsByClassName("parent")[0].value = hash
+    thread.insertBefore(@replyForm, post.nextSibling)
+    @replyForm.style.display = "table"
+    @replyForm.getElementsByClassName("text")[0].focus()
+    @replyForm.getElementsByClassName("parent")[0].value = hash
     @updateAuthForms()
 
   clearForm: (form) =>

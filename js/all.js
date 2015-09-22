@@ -478,21 +478,21 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     };
 
     Forms.prototype.callReplyForm = function(event) {
-      var el, hash, post, replyForm, thread;
+      var el, hash, post, thread;
       post = event.target.parentNode.parentNode.parentNode;
       thread = post.parentNode;
       hash = thread.dataset.hashsum;
-      if (!replyForm) {
+      if (!this.replyForm) {
         el = document.createElement("div");
         el.innerHTML = Templates.render("form");
-        replyForm = el.firstChild;
-        replyForm.id = "reply-form";
-        replyForm.addEventListener("submit", this.handleSubmit);
+        this.replyForm = el.firstChild;
+        this.replyForm.id = "reply-form";
+        this.replyForm.addEventListener("submit", this.handleSubmit);
       }
-      thread.insertBefore(replyForm, post.nextSibling);
-      replyForm.style.display = "table";
-      replyForm.getElementsByClassName("text")[0].focus();
-      replyForm.getElementsByClassName("parent")[0].value = hash;
+      thread.insertBefore(this.replyForm, post.nextSibling);
+      this.replyForm.style.display = "table";
+      this.replyForm.getElementsByClassName("text")[0].focus();
+      this.replyForm.getElementsByClassName("parent")[0].value = hash;
       return this.updateAuthForms();
     };
 
@@ -525,12 +525,19 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
     }
 
     Header.prototype.update = function(siteInfo, settings) {
+      var link;
       this.element.outerHTML = Templates.render("header", {
         boardName: "Development",
         peers: siteInfo.settings.peers,
         siteSize: formatSizeUnits(siteInfo.settings.size)
       });
-      return this.element = document.getElementById("header");
+      this.element = document.getElementById("header");
+      console.log(document.location);
+      if (document.location.pathname === "/") {
+        link = document.getElementById("nullchan-link");
+        console.log(link);
+        return link.href = "//0chan.bit";
+      }
     };
 
     return Header;
@@ -540,6 +547,7 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
   window.Header = new Header();
 
 }).call(this);
+
 
 
 /* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/markup.coffee ---- */
@@ -851,7 +859,6 @@ window.urlRegexp = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-
   window.Threads = new Threads();
 
 }).call(this);
-
 
 
 /* ---- data/14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag/js/zengine/z.coffee ---- */

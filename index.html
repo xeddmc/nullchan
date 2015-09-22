@@ -19,10 +19,12 @@
     </div>
     <hr>
   </script>
+
   <script id="post-template" type="x-tmpl-mustache" class="template">
     <div class="post {{#post.parent}}reply{{/post.parent}}{{^post.parent}}opening{{/post.parent}}"
       data-hashsum={{post.hashsum}}>
       <div class="info">
+
         <div class="time-and-id">
           <span>
             {{#post.anonymous}}
@@ -65,7 +67,7 @@
     <div id="header">
       <a href="?" class="board-name" target="_parent">{{boardName}}</a> 
       on
-      <a href="/1FiSxj2yDPeGuuf6iBwRAXvEMQJATAZNt6" target="_parent" class="to-main">0chan.bit</a>
+      <a href="/0chan.bit" target="_parent" id="nullchan-link" class="to-main">0chan.bit</a>
 
       <div id="stats">{{peers}} peers, {{siteSize}}</div>
     </div>

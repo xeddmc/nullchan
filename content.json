@@ -2,10 +2,11 @@
   "address": "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag", 
   "background-color": "#222222", 
   "description": "Development board on 0chan", 
+  "domain": "dev.0chan.bit", 
   "files": {
     "css/all.css": {
-      "sha512": "06a64905025c6dd69573703edd35f8f0cab0eac0c5602941ad91d196be4a453b", 
-      "size": 7916
+      "sha512": "608161ec2dc60c527ca3c28e1403836342a7ddd1357fcb247ca8a8197c29fbd0", 
+      "size": 7967
     }, 
     "data/settings.json": {
       "sha512": "b0ba200b6fe2e745cd4364f1afe98d4707975647e1e90c1fb8c832dadd88d994", 
@@ -20,12 +21,12 @@
       "size": 4852
     }, 
     "index.html": {
-      "sha512": "6a9f0302f4d227c765afda65afd81d8f687b1d1b029c436d6ddf2f003ae60cc9", 
-      "size": 3479
+      "sha512": "eb8a8852f18c2610da104baaf7212c111a1405c9279496fec68deba22b864504", 
+      "size": 3475
     }, 
     "js/all.js": {
-      "sha512": "951d3ec1b2a5ef2fe9174cec99d5980f94b70109e1affcfb4a3526ae1f10f7ce", 
-      "size": 39480
+      "sha512": "c5ff5a8a7cbabf11bb7c6da5c9bbb790d9c387b5d018010967befbebbf178d86", 
+      "size": 46174
     }
   }, 
   "ignore": "(.git|data/users|data/0chan.db|js/lib|css/lib|js/zengine).*", 
@@ -35,14 +36,14 @@
       "signers_required": 1
     }
   }, 
-  "modified": 1442350701.354847, 
+  "modified": 1442919205.095574, 
   "sign": [
-    11796306023230498969290895218696581272703482683737768628948813887852666991443, 
-    26779558250462017082319926482408186289351381793382790349341933440399174817928
+    62536136851511944971060167767400584077886728719799260734877164417097121279497, 
+    110383306131612985316785780595338285351888628298517656086815504636144957172009
   ], 
   "signers_sign": "HEEFf+vCP4aoQW61BjKcTwKboCruKMov5K1vE8lxeijrf4uDTfkcqJWKyeG4pyNo5a7yd8YJo99Wr9cxys/l9mM=", 
   "signs": {
-    "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag": "G8AThdZpc4hMZUr2mDg6GcN9rNktdwT7tQPMUr1XaznlB18XWcejTRoeqUPiv4d/3Tpnj7ty1nipzUZ9NegDjLE="
+    "14kr6qSTxrHAcNEhZQ6RWZyovnyhzXT2Ag": "HKHgSWtfpSXT7kya+5vMnCjwldktzl5TqjGy8nfm/7fKL+HyXxVTjqbo5qEYrfRi6k9BY2hMdSuyNAvvsZwg0tY="
   }, 
   "signs_required": 1, 
   "title": "dev.0chan", 

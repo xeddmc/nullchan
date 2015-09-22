@@ -11,6 +11,9 @@ class Header
       siteSize:   formatSizeUnits(siteInfo.settings.size)
 
     @element = document.getElementById("header")
+    if document.location.pathname == "/"
+      link = document.getElementById("nullchan-link")
+      link.href = "//0chan.bit"
 
 window.Header = new Header()
 
